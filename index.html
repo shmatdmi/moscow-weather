@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Погода в Москве</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #fff8d6;
+      --panel: #ffffff;
+      --text: #172026;
+      --muted: #66757f;
+      --accent: #167c80;
+      --accent-soft: #dff2f1;
+      --error: #b42318;
+      --weather-bg: #ffffff;
+      --wind-bg: #f7fafb;
+      --shadow: 0 18px 45px rgba(23, 32, 38, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top left, rgba(22, 124, 128, 0.16), transparent 32rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .auth {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 10;
+      width: min(160px, calc(100vw - 24px));
+      padding: 8px;
+      border: 1px solid rgba(23, 32, 38, 0.08);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 8px 22px rgba(23, 32, 38, 0.12);
+    }
+
+    .auth__title {
+      margin: 0 0 6px;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .auth__form {
+      display: grid;
+      gap: 5px;
+    }
+
+    .auth__input {
+      width: 100%;
+      min-height: 24px;
+      padding: 5px 6px;
+      border: 1px solid rgba(23, 32, 38, 0.16);
+      border-radius: 6px;
+      color: var(--text);
+      font: 12px/1.2 Arial, Helvetica, sans-serif;
+    }
+
+    .auth__input:focus {
+      outline: 2px solid rgba(22, 124, 128, 0.2);
+      border-color: var(--accent);
+    }
+
+    .auth__actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+
+    .auth__button {
+      min-height: 24px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      font: 700 10px/1.1 Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .auth__button--secondary {
+      border: 1px solid rgba(22, 124, 128, 0.28);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .auth__button:hover {
+      filter: brightness(0.96);
+    }
+
+    .auth__message {
+      min-height: 14px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.25;
+    }
+
+    .auth__message.is-error {
+      color: var(--error);
+    }
+
+    .auth__profile {
+      display: none;
+      gap: 6px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .auth.is-logged-in .auth__form {
+      display: none;
+    }
+
+    .auth.is-logged-in .auth__profile {
+      display: flex;
+    }
+
+    .weather {
+      width: min(100%, 430px);
+      padding: 28px;
+      border: 1px solid rgba(23, 32, 38, 0.08);
+      border-radius: 8px;
+      background-color: var(--weather-bg);
+      box-shadow: var(--shadow);
+      transition: background-color 300ms ease;
+    }
+
+    .weather__header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .weather__status,
+    .weather__updated {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .weather__badge {
+      flex: 0 0 auto;
+      min-width: 72px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .weather__main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      min-height: 126px;
+      padding: 18px;
+      border-radius: 8px;
+      background-color: #f7fafb;
+      border: 1px solid rgba(23, 32, 38, 0.07);
+    }
+
+    .metric--wind {
+      background-color: var(--wind-bg);
+      transition: background-color 300ms ease;
+    }
+
+    .metric__label {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .metric__value {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .metric__unit {
+      font-size: 18px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .weather__details {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(23, 32, 38, 0.1);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .weather__error {
+      display: none;
+      margin: 18px 0 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #fff1f0;
+      color: var(--error);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .weather__error.is-visible {
+      display: block;
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 72px 16px 16px;
+      }
+
+      .auth {
+        top: 8px;
+        right: 8px;
+        width: min(160px, calc(100vw - 16px));
+      }
+
+      .weather {
+        padding: 22px;
+      }
+
+      .weather__header,
+      .weather__details {
+        display: block;
+      }
+
+      .weather__badge {
+        display: inline-block;
+        margin-top: 14px;
+      }
+
+      .weather__main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="auth" id="auth" aria-label="Авторизация">
+    <h2 class="auth__title">Вход</h2>
+    <form class="auth__form" id="authForm">
+      <input class="auth__input" id="authLogin" type="text" autocomplete="username" placeholder="Логин" required>
+      <input class="auth__input" id="authPassword" type="password" autocomplete="current-password" placeholder="Пароль" required>
+      <div class="auth__actions">
+        <button class="auth__button" type="submit">Войти</button>
+        <button class="auth__button auth__button--secondary" id="registerButton" type="button">Регистрация</button>
+      </div>
+      <p class="auth__message" id="authMessage">Данные хранятся локально в браузере.</p>
+    </form>
+    <div class="auth__profile">
+      <p class="auth__message">Вы вошли как <strong id="authUser"></strong></p>
+      <button class="auth__button auth__button--secondary" id="logoutButton" type="button">Выйти</button>
+    </div>
+  </aside>
+
+  <main class="weather" aria-live="polite">
+    <header class="weather__header">
+      <div>
+        <h1>Погода в Москве</h1>
+        <p class="weather__status" id="description">Загрузка данных...</p>
+      </div>
+      <div class="weather__badge">Live</div>
+    </header>
+
+    <section class="weather__main" aria-label="Текущие показатели">
+      <article class="metric">
+        <p class="metric__label">Температура</p>
+        <p class="metric__value"><span id="temperature">--</span><span class="metric__unit"> °C</span></p>
+      </article>
+
+      <article class="metric metric--wind">
+        <p class="metric__label">Скорость ветра</p>
+        <p class="metric__value"><span id="wind">--</span><span class="metric__unit"> м/с</span></p>
+      </article>
+    </section>
+
+    <section class="weather__details" aria-label="Детали обновления">
+      <span>Обновление: каждую минуту</span>
+      <span class="weather__updated" id="updated">Последнее обновление: --</span>
+    </section>
+
+    <p class="weather__error" id="error"></p>
+  </main>
+
+  <script>
+    const apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=Moscow,RU&appid=ba23e3e7888484e7a26b57b215d65200&units=metric';
+    const updateIntervalMs = 60 * 1000;
+    const minTemperature = -30;
+    const maxTemperature = 38;
+    const minWindSpeed = 0;
+    const maxWindSpeed = 25;
+
+    const weatherEl = document.querySelector('.weather');
+    const windMetricEl = document.querySelector('.metric--wind');
+    const temperatureEl = document.getElementById('temperature');
+    const windEl = document.getElementById('wind');
+    const descriptionEl = document.getElementById('description');
+    const updatedEl = document.getElementById('updated');
+    const errorEl = document.getElementById('error');
+    const authEl = document.getElementById('auth');
+    const authFormEl = document.getElementById('authForm');
+    const authLoginEl = document.getElementById('authLogin');
+    const authPasswordEl = document.getElementById('authPassword');
+    const authMessageEl = document.getElementById('authMessage');
+    const authUserEl = document.getElementById('authUser');
+    const registerButtonEl = document.getElementById('registerButton');
+    const logoutButtonEl = document.getElementById('logoutButton');
+    const usersStorageKey = 'weatherUsers';
+    const sessionStorageKey = 'weatherCurrentUser';
+    const weatherCacheStorageKey = 'weatherLastSuccessfulResponse';
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat('ru-RU', {
+        maximumFractionDigits: 1
+      }).format(value);
+    }
+
+    function formatTime(date) {
+      return new Intl.DateTimeFormat('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).format(date);
+    }
+
+    function updateWeatherBackground(temperature) {
+      if (!Number.isFinite(temperature)) {
+        weatherEl.style.setProperty('--weather-bg', 'var(--panel)');
+        return;
+      }
+
+      const boundedTemperature = Math.min(Math.max(temperature, minTemperature), maxTemperature);
+      const ratio = (boundedTemperature - minTemperature) / (maxTemperature - minTemperature);
+      const hue = 210 - (205 * ratio);
+      weatherEl.style.setProperty('--weather-bg', `hsl(${hue} 82% 92%)`);
+    }
+
+    function updateWindBackground(windSpeed) {
+      if (!Number.isFinite(windSpeed)) {
+        windMetricEl.style.setProperty('--wind-bg', '#f7fafb');
+        return;
+      }
+
+      const boundedWindSpeed = Math.min(Math.max(windSpeed, minWindSpeed), maxWindSpeed);
+      const ratio = (boundedWindSpeed - minWindSpeed) / (maxWindSpeed - minWindSpeed);
+      const hue = 190 - (185 * ratio);
+      windMetricEl.style.setProperty('--wind-bg', `hsl(${hue} 82% 91%)`);
+    }
+
+    function getCachedWeather() {
+      try {
+        return JSON.parse(localStorage.getItem(weatherCacheStorageKey));
+      } catch {
+        return null;
+      }
+    }
+
+    function saveCachedWeather(data, updatedAt) {
+      localStorage.setItem(weatherCacheStorageKey, JSON.stringify({
+        data,
+        updatedAt
+      }));
+    }
+
+    function renderWeather(data, updatedAt) {
+      const temperature = data.main?.temp;
+      const windSpeed = data.wind?.speed;
+      const description = data.weather?.[0]?.description || 'Данные о погоде получены';
+
+      temperatureEl.textContent = Number.isFinite(temperature) ? formatNumber(temperature) : '--';
+      updateWeatherBackground(temperature);
+      windEl.textContent = Number.isFinite(windSpeed) ? formatNumber(windSpeed) : '--';
+      updateWindBackground(windSpeed);
+      descriptionEl.textContent = description.charAt(0).toUpperCase() + description.slice(1);
+      updatedEl.textContent = `Последнее обновление: ${formatTime(new Date(updatedAt))}`;
+    }
+
+    function getUsers() {
+      try {
+        return JSON.parse(localStorage.getItem(usersStorageKey)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem(usersStorageKey, JSON.stringify(users));
+    }
+
+    function setAuthMessage(text, isError = false) {
+      authMessageEl.textContent = text;
+      authMessageEl.classList.toggle('is-error', isError);
+    }
+
+    function setCurrentUser(login) {
+      if (login) {
+        localStorage.setItem(sessionStorageKey, login);
+        authUserEl.textContent = login;
+        authEl.classList.add('is-logged-in');
+      } else {
+        localStorage.removeItem(sessionStorageKey);
+        authUserEl.textContent = '';
+        authEl.classList.remove('is-logged-in');
+      }
+    }
+
+    function normalizeLogin(login) {
+      return login.trim().toLowerCase();
+    }
+
+    function registerUser() {
+      const login = normalizeLogin(authLoginEl.value);
+      const password = authPasswordEl.value;
+      const users = getUsers();
+
+      if (login.length < 3 || password.length < 4) {
+        setAuthMessage('Логин от 3 символов, пароль от 4 символов.', true);
+        return;
+      }
+
+      if (users[login]) {
+        setAuthMessage('Такой пользователь уже есть.', true);
+        return;
+      }
+
+      users[login] = { password };
+      saveUsers(users);
+      setCurrentUser(login);
+      authFormEl.reset();
+    }
+
+    function loginUser(event) {
+      event.preventDefault();
+      const login = normalizeLogin(authLoginEl.value);
+      const password = authPasswordEl.value;
+      const users = getUsers();
+
+      if (!users[login] || users[login].password !== password) {
+        setAuthMessage('Неверный логин или пароль.', true);
+        return;
+      }
+
+      setCurrentUser(login);
+      authFormEl.reset();
+    }
+
+    async function loadWeather() {
+      try {
+        errorEl.classList.remove('is-visible');
+        errorEl.textContent = '';
+
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+          throw new Error(`Ошибка загрузки: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const updatedAt = new Date().toISOString();
+        saveCachedWeather(data, updatedAt);
+        renderWeather(data, updatedAt);
+      } catch (error) {
+        const cachedWeather = getCachedWeather();
+
+        if (cachedWeather?.data && cachedWeather?.updatedAt) {
+          renderWeather(cachedWeather.data, cachedWeather.updatedAt);
+          errorEl.textContent = 'Не удалось получить свежие данные о погоде. Показаны данные последнего успешного обновления.';
+        } else {
+          errorEl.textContent = 'Не удалось получить данные о погоде. Следующая попытка будет через минуту.';
+        }
+
+        errorEl.classList.add('is-visible');
+        console.error(error);
+      }
+    }
+
+    loadWeather();
+    setInterval(loadWeather, updateIntervalMs);
+    setCurrentUser(localStorage.getItem(sessionStorageKey));
+    authFormEl.addEventListener('submit', loginUser);
+    registerButtonEl.addEventListener('click', registerUser);
+    logoutButtonEl.addEventListener('click', () => {
+      setCurrentUser('');
+      setAuthMessage('Данные хранятся локально в браузере.');
+    });
+  </script>
+</body>
+</html>
