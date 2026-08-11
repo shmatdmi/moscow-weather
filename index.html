@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#77acd2">
-  <title>Погода в России</title>
+  <title>Погода в городах Европы</title>
   <style>
     :root {
       color-scheme: light;
@@ -31,7 +31,7 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
         linear-gradient(180deg, rgba(52, 119, 164, 0.06), rgba(47, 93, 56, 0.18)),
-        url("serene-hills.png") center / cover fixed;
+        url("late-summer-landscape.png") center / cover fixed;
     }
 
     .page {
@@ -77,10 +77,10 @@
 
     .weather-card {
       min-width: 0;
-      padding: 24px;
+      padding: 19px;
       overflow: hidden;
       border: 1px solid var(--line);
-      border-radius: 24px;
+      border-radius: 19px;
       background: var(--glass);
       box-shadow: var(--shadow);
       backdrop-filter: blur(17px) saturate(115%);
@@ -101,34 +101,34 @@
 
     .city {
       margin: 0;
-      font-size: 25px;
+      font-size: 20px;
       line-height: 1.1;
       letter-spacing: -0.025em;
     }
 
     .live {
       flex: 0 0 auto;
-      padding: 7px 10px;
+      padding: 6px 8px;
       border: 1px solid rgba(70, 124, 105, 0.2);
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.46);
       color: var(--accent);
-      font-size: 11px;
+      font-size: 9px;
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     .description {
-      min-height: 22px;
-      margin: 9px 0 24px;
+      min-height: 18px;
+      margin: 7px 0 19px;
       color: var(--muted);
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .temperature {
-      margin: 0 0 22px;
-      font-size: clamp(52px, 6vw, 72px);
+      margin: 0 0 18px;
+      font-size: clamp(42px, 4.8vw, 58px);
       font-weight: 650;
       line-height: 0.92;
       letter-spacing: -0.07em;
@@ -137,24 +137,24 @@
     .temperature__unit {
       margin-left: 3px;
       color: var(--muted);
-      font-size: 24px;
+      font-size: 19px;
       font-weight: 500;
       vertical-align: top;
       letter-spacing: -0.02em;
     }
 
     .metric-row {
-      padding: 14px 0;
+      padding: 11px 0;
       border-top: 1px solid rgba(25, 49, 64, 0.1);
     }
 
-    .metric-label { color: var(--muted); font-size: 13px; }
-    .metric-value { font-size: 15px; font-weight: 750; }
+    .metric-label { color: var(--muted); font-size: 11px; }
+    .metric-value { font-size: 12px; font-weight: 750; }
 
     .card__footer {
-      margin-top: 12px;
+      margin-top: 10px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 9px;
     }
 
     .error {
@@ -181,15 +181,14 @@
 
     @media (max-width: 880px) {
       body { background-attachment: scroll; }
-      .page { width: min(680px, calc(100% - 32px)); padding-top: 38px; }
-      .weather-grid { grid-template-columns: 1fr; }
-      .weather-card { padding: 22px; }
-      .temperature { font-size: 58px; }
+      .page { width: min(720px, calc(100% - 32px)); padding-top: 38px; }
+      .weather-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
-    @media (max-width: 420px) {
+    @media (max-width: 560px) {
       .page { width: calc(100% - 24px); padding-top: 28px; }
       .hero { margin-bottom: 22px; }
+      .weather-grid { grid-template-columns: 1fr; }
       .weather-card { border-radius: 20px; }
     }
 
@@ -205,7 +204,7 @@
       <p class="eyebrow">Погода сейчас</p>
     </header>
 
-    <section class="weather-grid" id="weatherGrid" aria-label="Погода в Москве, Туле и Сочи"></section>
+    <section class="weather-grid" id="weatherGrid" aria-label="Погода в Москве, Туле, Сочи, Минске, Лондоне и Мадриде"></section>
     <p class="error" id="globalError" role="status"></p>
   </main>
 
@@ -239,7 +238,10 @@
     const cities = [
       { name: 'Москва', query: 'Moscow,RU' },
       { name: 'Тула', query: 'Tula,RU' },
-      { name: 'Сочи', query: 'Sochi,RU' }
+      { name: 'Сочи', query: 'Sochi,RU' },
+      { name: 'Минск', query: 'Minsk,BY' },
+      { name: 'Лондон', query: 'London,GB' },
+      { name: 'Мадрид', query: 'Madrid,ES' }
     ];
     const updateIntervalMs = 60 * 1000;
     const grid = document.getElementById('weatherGrid');

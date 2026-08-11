@@ -2,6 +2,6 @@
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY index.html /usr/share/nginx/html/index.html
-COPY serene-hills.png /usr/share/nginx/html/serene-hills.png
+COPY late-summer-landscape.png /usr/share/nginx/html/late-summer-landscape.png
 
 EXPOSE 80
