@@ -42,7 +42,7 @@ Then run these three commands on the server:
 ```sh
 docker pull shmatdmi/moscow-weather:latest
 docker rm -f moscow-weather 2>nul
-docker run -d --name moscow-weather -p 80:80 shmatdmi/moscow-weather:latest
+docker run -d --restart unless-stopped --name moscow-weather -p 80:80 shmatdmi/moscow-weather:latest
 ```
 
 ## Change Notes
