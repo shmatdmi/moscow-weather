@@ -1,1 +1,70 @@
-﻿<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#76a6c6"><title>Погода в городах Европы</title><link rel="stylesheet" href="styles.css"></head><body><main class="page"><header class="hero"><p class="eyebrow">Погода сейчас</p><h1>Шесть городов.<br>Один взгляд.</h1><p>Свежие наблюдения с метеостанций. Нажмите на город, чтобы увидеть полный ответ погодного сервиса.</p></header><section class="weather-grid" id="weatherGrid" aria-label="Погода в выбранных городах"></section><p class="error" id="globalError" role="status"></p></main><footer>Данные OpenWeather · Обновление каждую минуту · 2026</footer><template id="weatherCardTemplate"><a class="weather-card" href="weather.html"><header class="card-head"><div><p class="country"></p><h2 class="city"></h2></div><span class="live"><i></i> Live</span></header><p class="description">Загрузка данных…</p><div class="temperature-line"><p class="temperature"><span class="temperature-value">--</span><small>°</small></p><span class="weather-icon"></span></div><div class="metric-row"><span>Ветер</span><strong><b class="wind">--</b> м/с</strong></div><div class="metric-row"><span>Ощущается</span><strong><b class="feels">--</b> °C</strong></div><div class="card-footer"><time class="updated">--:--</time><span>Подробнее →</span></div></a></template><script src="weather-api.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#76a6c6">
+  <title>Погода в городах Европы</title>
+  <link rel="stylesheet" href="styles.css?v=20260911-2">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Погода сейчас</p>
+      <h1>Шесть городов.<br>Один взгляд.</h1>
+      <p>Свежие наблюдения и почасовой прогноз. Нажмите на город, чтобы открыть график температуры от полуночи до семи дней.</p>
+    </header>
+    <section class="weather-grid" id="weatherGrid" aria-label="Погода в выбранных городах"></section>
+    <p class="error" id="globalError" role="status"></p>
+  </main>
+  <footer>Данные OpenWeather и Open-Meteo · Обновление каждую минуту · 2026</footer>
+
+  <template id="weatherCardTemplate">
+    <button class="weather-card" type="button">
+      <header class="card-head">
+        <div><p class="country"></p><h2 class="city"></h2></div>
+        <span class="live"><i></i> Live</span>
+      </header>
+      <p class="description">Загрузка данных…</p>
+      <div class="temperature-line">
+        <p class="temperature"><span class="temperature-value">--</span><small>°</small></p>
+        <span class="weather-icon"></span>
+      </div>
+      <div class="metric-row"><span>Ветер</span><strong><b class="wind">--</b> м/с</strong></div>
+      <div class="metric-row"><span>Ощущается</span><strong><b class="feels">--</b> °C</strong></div>
+      <div class="card-footer"><time class="updated">--:--</time><span>Открыть график ↗</span></div>
+    </button>
+  </template>
+
+  <dialog class="forecast-dialog" id="forecastDialog" aria-labelledby="chartTitle">
+    <div class="forecast-shell">
+      <header class="forecast-head">
+        <div>
+          <p class="eyebrow dark" id="chartCountry">Почасовой прогноз</p>
+          <h2 id="chartTitle">Температура</h2>
+          <p id="chartSummary">Загружаем данные…</p>
+        </div>
+        <button class="dialog-close" id="dialogClose" type="button" aria-label="Закрыть график">×</button>
+      </header>
+      <div class="range-switcher" id="rangeSwitcher" aria-label="Период графика">
+        <button type="button" data-days="1" class="active">Сегодня</button>
+        <button type="button" data-days="3">3 дня</button>
+        <button type="button" data-days="7">7 дней</button>
+      </div>
+      <div class="chart-wrap" id="chartWrap">
+        <div class="chart-loading" id="chartLoading">Строим прогноз от 00:00…</div>
+        <canvas id="temperatureChart" role="img" aria-label="График температуры"></canvas>
+      </div>
+      <div class="chart-legend">
+        <span><i></i> Температура, °C</span>
+        <span id="chartRange">Сегодня с 00:00</span>
+      </div>
+      <p class="error" id="chartError" role="alert"></p>
+      <a class="detail-link" id="detailLink" href="weather.html">Все показатели города →</a>
+    </div>
+  </dialog>
+
+  <script src="weather-api.js"></script>
+  <script src="app.js?v=20260911-2"></script>
+</body>
+</html>
